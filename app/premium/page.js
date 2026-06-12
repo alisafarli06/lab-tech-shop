@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   isPremium,
+  getPremiumPlan,
   PREMIUM_CHANGE_EVENT,
   setPremium,
   clearPremium,
@@ -14,16 +15,22 @@ const initialForm = {
   expiryDate: "",
   cvc: "",
   email: "",
+  plan: "monthly",
 };
 
 export default function PremiumPage() {
   const [form, setForm] = useState(initialForm);
   const [paid, setPaid] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState("monthly");
   const [error, setError] = useState("");
 
   useEffect(() => {
     function syncPaidStatus() {
-      setPaid(isPremium());
+      const isPaid = isPremium();
+      setPaid(isPaid);
+      if (isPaid) {
+        setSelectedPlan(getPremiumPlan());
+      }
     }
 
     syncPaidStatus();
@@ -79,7 +86,7 @@ export default function PremiumPage() {
       return;
     }
 
-    setPremium();
+    setPremium(form.plan);
     setPaid(true);
   }
 
@@ -90,7 +97,10 @@ export default function PremiumPage() {
           <p className="text-2xl font-bold text-emerald-800 dark:text-emerald-200">
             ✅ Payment complete, ads removed!
           </p>
-          <p className="mt-3 text-sm text-emerald-700 dark:text-emerald-300">
+          <p className="mt-2 text-md font-semibold text-emerald-700 dark:text-emerald-300 capitalize">
+            Plan active: {selectedPlan === "lifetime" ? "⭐ Lifetime ($49.99, one-time)" : "Monthly ($9.99/mo)"}
+          </p>
+          <p className="mt-3 text-sm text-emerald-600 dark:text-emerald-400">
             Enjoy your ad-free TechCart experience. Your premium status is saved
             in this browser.
           </p>
@@ -128,6 +138,49 @@ export default function PremiumPage() {
             ⚠️ {error}
           </div>
         )}
+
+        <div>
+          <label className="mb-2 block text-sm font-medium">
+            Select Plan
+          </label>
+          <div className="grid grid-cols-2 gap-4">
+            <label className={`flex cursor-pointer flex-col rounded-lg border p-4 text-center transition-all ${
+              form.plan === "monthly"
+                ? "border-indigo-600 bg-indigo-50/50 dark:border-indigo-500 dark:bg-indigo-950/20"
+                : "border-black/15 bg-white hover:bg-zinc-50 dark:border-white/15 dark:bg-zinc-950 dark:hover:bg-zinc-900"
+            }`}>
+              <input
+                type="radio"
+                name="plan"
+                value="monthly"
+                checked={form.plan === "monthly"}
+                onChange={handleChange}
+                className="sr-only"
+              />
+              <span className="text-sm font-bold">Monthly Plan</span>
+              <span className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">$9.99 / month</span>
+            </label>
+
+            <label className={`flex cursor-pointer flex-col rounded-lg border p-4 text-center transition-all ${
+              form.plan === "lifetime"
+                ? "border-indigo-600 bg-indigo-50/50 dark:border-indigo-500 dark:bg-indigo-950/20"
+                : "border-black/15 bg-white hover:bg-zinc-50 dark:border-white/15 dark:bg-zinc-950 dark:hover:bg-zinc-900"
+            }`}>
+              <input
+                type="radio"
+                name="plan"
+                value="lifetime"
+                checked={form.plan === "lifetime"}
+                onChange={handleChange}
+                className="sr-only"
+              />
+              <span className="text-sm font-bold flex items-center justify-center gap-1">
+                ⭐ Lifetime
+              </span>
+              <span className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">$49.99 one-time</span>
+            </label>
+          </div>
+        </div>
 
         <div>
           <label htmlFor="cardholderName" className="mb-1 block text-sm font-medium">
@@ -214,7 +267,7 @@ export default function PremiumPage() {
           type="submit"
           className="w-full rounded-full bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-indigo-500"
         >
-          Pay $9.99 / month
+          Pay {form.plan === "lifetime" ? "$49.99 one-time" : "$9.99 / month"}
         </button>
       </form>
     </main>

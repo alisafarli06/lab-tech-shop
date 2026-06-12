@@ -37,3 +37,4 @@ User fills out the controlled form on `/premium` and submits. `setPremium()` wri
 - **Restore Ads button**: Added a "Restore ads (Cancel Premium)" button on the confirmation screen that clears the storage key and updates the state immediately across the app.
 - **Active Navigation Highlighting**: Navbar links now change color/style dynamically when active using `usePathname`.
 - **Premium Badge**: A "⭐ Premium" badge appears next to the logo, and the premium button changes to a green "Premium ✓" state when active.
+- **Two plans option**: Users can now select between a "Monthly Plan" ($9.99/mo) and a "Lifetime Plan" ($49.99 one-time). Their plan selection is stored in `localStorage` and displayed dynamically in the success confirmation and in the Navbar badge (e.g., "⭐ Premium (lifetime)").

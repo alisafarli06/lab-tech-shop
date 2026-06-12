@@ -3,15 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { isPremium, PREMIUM_CHANGE_EVENT } from "../../lib/premium";
+import { isPremium, getPremiumPlan, PREMIUM_CHANGE_EVENT } from "../../lib/premium";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [paid, setPaid] = useState(false);
+  const [plan, setPlan] = useState("monthly");
 
   useEffect(() => {
     function syncPaidStatus() {
-      setPaid(isPremium());
+      const isPaid = isPremium();
+      setPaid(isPaid);
+      if (isPaid) {
+        setPlan(getPremiumPlan());
+      }
     }
 
     syncPaidStatus();
@@ -40,8 +45,8 @@ export default function Navbar() {
             ⚡ TechCart
           </Link>
           {paid && (
-            <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-600 dark:bg-amber-500/20 dark:text-amber-400">
-              ⭐ Premium
+            <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 capitalize">
+              ⭐ Premium ({plan})
             </span>
           )}
         </div>
