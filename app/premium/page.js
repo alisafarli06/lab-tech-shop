@@ -5,6 +5,7 @@ import {
   isPremium,
   PREMIUM_CHANGE_EVENT,
   setPremium,
+  clearPremium,
 } from "../../lib/premium";
 
 const initialForm = {
@@ -18,6 +19,7 @@ const initialForm = {
 export default function PremiumPage() {
   const [form, setForm] = useState(initialForm);
   const [paid, setPaid] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     function syncPaidStatus() {
@@ -39,6 +41,44 @@ export default function PremiumPage() {
 
   function handleSubmit(event) {
     event.preventDefault();
+    setError("");
+
+    // 1. Validate Cardholder Name
+    if (form.cardholderName.trim().length < 2) {
+      setError("Cardholder name must be at least 2 characters.");
+      return;
+    }
+
+    // 2. Validate Card Number (13 to 19 digits)
+    const cardDigits = form.cardNumber.replace(/\s+/g, "");
+    if (!/^\d{13,19}$/.test(cardDigits)) {
+      setError("Card number must be between 13 and 19 digits.");
+      return;
+    }
+
+    // 3. Validate Expiry Date (MM/YY)
+    const expiryMatch = form.expiryDate.trim().match(/^(0[1-9]|1[0-2])\/?([0-9]{2})$/);
+    if (!expiryMatch) {
+      setError("Expiry date must be in MM/YY format.");
+      return;
+    }
+    const [_, monthStr, yearStr] = expiryMatch;
+    const expMonth = parseInt(monthStr, 10);
+    const expYear = parseInt("20" + yearStr, 10);
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1;
+    const currentYear = currentDate.getFullYear();
+    if (expYear < currentYear || (expYear === currentYear && expMonth < currentMonth)) {
+      setError("The card has expired.");
+      return;
+    }
+
+    // 4. Validate CVC (3 or 4 digits)
+    if (!/^\d{3,4}$/.test(form.cvc.trim())) {
+      setError("CVC must be 3 or 4 digits.");
+      return;
+    }
+
     setPremium();
     setPaid(true);
   }
@@ -54,6 +94,16 @@ export default function PremiumPage() {
             Enjoy your ad-free TechCart experience. Your premium status is saved
             in this browser.
           </p>
+          <button
+            onClick={() => {
+              clearPremium();
+              setPaid(false);
+              setForm(initialForm);
+            }}
+            className="mt-6 inline-block rounded-full border border-zinc-300 bg-white px-5 py-2.5 text-sm font-semibold text-zinc-700 shadow-sm transition-all hover:bg-zinc-50 hover:text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
+          >
+            Restore ads (Cancel Premium)
+          </button>
         </div>
       </main>
     );
@@ -73,6 +123,12 @@ export default function PremiumPage() {
         onSubmit={handleSubmit}
         className="space-y-5 rounded-2xl border border-black/10 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-zinc-900"
       >
+        {error && (
+          <div className="rounded-lg border border-red-500/30 bg-red-50 p-3 text-sm font-medium text-red-800 dark:border-red-500/40 dark:bg-red-950/40 dark:text-red-200 animate-pulse">
+            ⚠️ {error}
+          </div>
+        )}
+
         <div>
           <label htmlFor="cardholderName" className="mb-1 block text-sm font-medium">
             Cardholder name
@@ -97,6 +153,7 @@ export default function PremiumPage() {
             name="cardNumber"
             type="text"
             inputMode="numeric"
+            placeholder="1234 5678 1234 5678"
             required
             value={form.cardNumber}
             onChange={handleChange}
@@ -129,6 +186,7 @@ export default function PremiumPage() {
               name="cvc"
               type="text"
               inputMode="numeric"
+              placeholder="123"
               required
               value={form.cvc}
               onChange={handleChange}

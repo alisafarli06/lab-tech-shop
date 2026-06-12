@@ -31,6 +31,9 @@
 
 User fills out the controlled form on `/premium` and submits. `setPremium()` writes `techcart-premium=true` to `localStorage` and dispatches a custom event. `AdBanner` hears that event (or reads storage on mount) and sets `showAds` to false, so both banners unmount. On refresh, `AdBanner`'s `useEffect` reads the same flag and keeps the ads hidden.
 
-## 5. If I had another hour
+## 5. Extra credits implemented
 
-Add basic form validation (card number length, email format) and a "Restore ads" button that clears the flag — useful for testing and for users who want the chaos back.
+- **Form Validation**: Form fields (Cardholder name, Card number length 13-19, MM/YY expiry date and expiry checks, and CVC length 3-4) are validated on the client side with helpful error warnings.
+- **Restore Ads button**: Added a "Restore ads (Cancel Premium)" button on the confirmation screen that clears the storage key and updates the state immediately across the app.
+- **Active Navigation Highlighting**: Navbar links now change color/style dynamically when active using `usePathname`.
+- **Premium Badge**: A "⭐ Premium" badge appears next to the logo, and the premium button changes to a green "Premium ✓" state when active.
